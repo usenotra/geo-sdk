@@ -93,5 +93,8 @@ jobs:
         with:
           name: geo-tarball
 
-      - name: Publish
-        run: npm publish geo.tgz --provenance --access public
+      - name: Install npm with staged publishing
+        run: npm install -g npm@12.2.0
+
+      - name: Stage publish
+        run: npm stage publish ./geo.tgz --provenance --access public
