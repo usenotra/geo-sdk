@@ -1,6 +1,6 @@
 {
   "name": "@usenotra/geo",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "private": false,
   "description": "Request capture SDK for AI traffic attribution and agent feedback collection",
   "keywords": [
@@ -18,6 +18,7 @@
     "netlify",
     "nextjs",
     "nuxt",
+    "react-router",
     "sveltekit",
     "tanstack"
   ],
@@ -60,6 +61,10 @@
     "./sveltekit": {
       "types": "./dist/sveltekit.d.ts",
       "default": "./dist/sveltekit.js"
+    },
+    "./react-router": {
+      "types": "./dist/react-router.d.ts",
+      "default": "./dist/react-router.js"
     },
     "./signatures": {
       "types": "./dist/signatures.d.ts",
