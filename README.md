@@ -114,7 +114,7 @@ const geo = createGeoMiddleware({
 export const middleware: Route.MiddlewareFunction[] = [geo];
 ```
 
-The middleware sends the event after `next()` returns, so the response never waits on it. On Vercel it hands the send to the request's `waitUntil` automatically. On other serverless hosts pass `waitUntil` yourself, for example `import { waitUntil } from "cloudflare:workers"` on Cloudflare. Long-running Node servers need nothing extra. React Router 8 always runs middleware; on React Router 7.9 or later set `future: { v8_middleware: true }` in `react-router.config.ts`.
+The middleware sends the event after `next()` returns, so the response never waits on it. Long-running Node servers need nothing extra. On serverless hosts pass the host's `waitUntil` so the send outlives the response, for example `import { waitUntil } from "@vercel/functions"` on Vercel or `import { waitUntil } from "cloudflare:workers"` on Cloudflare. React Router 8 always runs middleware; on React Router 7.9 or later set `future: { v8_middleware: true }` in `react-router.config.ts`.
 
 ## Netlify Edge Functions
 
@@ -144,7 +144,7 @@ send alive.
 | `sample` | `1` | Fraction of eligible requests to send, 0 to 1 |
 | `onError` | none | Called for network failures and non-success HTTP responses, including 401, 429 and 502. The SDK never throws |
 | `fetch` | global `fetch` | Injectable fetch, for tests |
-| `waitUntil` | Vercel's request `waitUntil` | React Router only. Keeps the send alive after the response on serverless hosts |
+| `waitUntil` | none | React Router only. Keeps the send alive after the response on serverless hosts |
 
 Requests go directly to `https://ingest.usenotra.com` when `endpoint` is omitted.
 The SDK does not automatically retry through the dashboard. To switch back to

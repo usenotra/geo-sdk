@@ -79,5 +79,3 @@ export const ASSET_EXTENSIONS = [
   ".xml",
   ".zip",
 ];
-
-export const VERCEL_REQUEST_CONTEXT = Symbol.for("@vercel/request-context");
