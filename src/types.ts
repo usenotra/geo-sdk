@@ -100,6 +100,16 @@ export interface GeoNextOptions extends GeoTrackerOptions {
   tagLinks?: GeoTagLinksOption;
 }
 
+export type WaitUntil = (promise: Promise<unknown>) => void;
+
+export interface GeoReactRouterOptions extends GeoTrackerOptions {
+  waitUntil?: WaitUntil;
+}
+
+export interface ReactRouterMiddlewareArgs {
+  request: Request;
+}
+
 export interface WaitUntilContext {
   waitUntil(promise: Promise<unknown>): void;
 }

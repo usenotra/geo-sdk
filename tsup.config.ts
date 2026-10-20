@@ -9,6 +9,7 @@ export default defineConfig({
     "src/tanstack.ts",
     "src/astro.ts",
     "src/sveltekit.ts",
+    "src/react-router.ts",
     "src/signatures.ts",
     "src/classify.ts",
     "src/markdown.ts",
