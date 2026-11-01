@@ -1,6 +1,6 @@
 {
   "name": "@usenotra/geo",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": false,
   "description": "Request capture SDK for AI traffic attribution and agent feedback collection",
   "keywords": [
@@ -85,6 +85,10 @@
     "./feedback": {
       "types": "./dist/feedback.d.ts",
       "default": "./dist/feedback.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "default": "./dist/mcp.js"
     }
   },
   "publishConfig": {

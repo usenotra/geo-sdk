@@ -15,6 +15,7 @@ export default defineConfig({
     "src/markdown.ts",
     "src/html.ts",
     "src/feedback.ts",
+    "src/mcp.ts",
   ],
   format: ["esm"],
   outDir: "dist",
