@@ -1,8 +1,46 @@
-import { sendRequestLog } from "../send";
-import { MCP_BATCH_MAX_EVENTS, MCP_FLUSH_INTERVAL_MS } from "./constants";
+import { reportGeoError, sendRequestLog } from "../send";
+import { byteLength } from "./capture";
+import {
+  MCP_BATCH_MAX_BYTES,
+  MCP_BATCH_MAX_EVENTS,
+  MCP_FLUSH_INTERVAL_MS,
+} from "./constants";
 import type { McpAnalyticsOptions, McpEvent } from "./types";
 
 const batchers = new Set<McpBatcher>();
+
+function shrink(event: McpEvent): McpEvent | undefined {
+  const candidates = [
+    event,
+    { ...event, arguments: undefined, response: undefined },
+    {
+      ...event,
+      arguments: undefined,
+      response: undefined,
+      tools: event.tools?.map((tool) => ({ name: tool.name })),
+    },
+  ];
+  return candidates.find(
+    (candidate) => byteLength(candidate) < MCP_BATCH_MAX_BYTES
+  );
+}
+
+function takeBatch(queue: McpEvent[]): McpEvent[] {
+  let bytes = 0;
+  let count = 0;
+  for (const event of queue) {
+    const size = byteLength(event) + 1;
+    if (
+      count === MCP_BATCH_MAX_EVENTS ||
+      (count > 0 && bytes + size > MCP_BATCH_MAX_BYTES)
+    ) {
+      break;
+    }
+    bytes += size;
+    count += 1;
+  }
+  return queue.splice(0, count);
+}
 
 export class McpBatcher {
   readonly #options: McpAnalyticsOptions;
@@ -16,7 +54,15 @@ export class McpBatcher {
   }
 
   push(event: McpEvent): void {
-    this.#queue.push(event);
+    const fitted = shrink(event);
+    if (!fitted) {
+      reportGeoError(
+        this.#options.onError,
+        new Error(`MCP event for ${event.method} is too large to send`)
+      );
+      return;
+    }
+    this.#queue.push(fitted);
     if (this.#queue.length >= MCP_BATCH_MAX_EVENTS) {
       this.#keepAlive(this.flush());
       return;
@@ -50,7 +96,7 @@ export class McpBatcher {
     this.#settle = undefined;
     const sends: Promise<void>[] = [];
     while (this.#queue.length > 0) {
-      const events = this.#queue.splice(0, MCP_BATCH_MAX_EVENTS);
+      const events = takeBatch(this.#queue);
       sends.push(sendRequestLog({ type: "mcp", events }, this.#options));
     }
     try {

@@ -167,6 +167,7 @@ export function trackMcpTransport<T extends McpTransportLike>(
   let client: McpPeerInfo | undefined;
   let server: McpPeerInfo | undefined;
   let protocolVersion: string | undefined;
+  let sequence = 0;
 
   const report = (event: McpEvent) => {
     try {
@@ -204,6 +205,7 @@ export function trackMcpTransport<T extends McpTransportLike>(
       return;
     }
     pending.set(id, {
+      sequence: sequence++,
       method,
       target: readTarget(params),
       startedAt: performance.now(),
@@ -225,6 +227,7 @@ export function trackMcpTransport<T extends McpTransportLike>(
     const event: McpEvent = {
       timestamp: request.timestamp,
       sessionId: transport.sessionId ?? fallbackSessionId,
+      sequence: request.sequence,
       method: request.method,
       target: request.target,
       status: "ok",
@@ -313,6 +316,7 @@ export function trackMcpTransport<T extends McpTransportLike>(
     const related = relatedId === undefined ? undefined : pending.get(relatedId);
     const params = isRecord(message.params) ? message.params : undefined;
     outgoing.set(id, {
+      sequence: sequence++,
       method,
       target: related?.target,
       startedAt: performance.now(),

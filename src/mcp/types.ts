@@ -20,6 +20,8 @@ export interface McpEvent {
   protocolVersion?: string;
   server?: McpPeerInfo;
   client?: McpPeerInfo;
+  /** Order of the request within its connection, for events that share a millisecond. */
+  sequence?: number;
   method: string;
   target?: string;
   status: McpEventStatus;
@@ -79,6 +81,7 @@ export interface McpAnalyticsOptions {
 }
 
 export interface McpPendingRequest {
+  sequence: number;
   method: string;
   target?: string;
   startedAt: number;

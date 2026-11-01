@@ -14,6 +14,8 @@ export const MCP_CAPTURE_STRING_MAX_LENGTH = 256;
 
 export const MCP_BATCH_MAX_EVENTS = 100;
 
+export const MCP_BATCH_MAX_BYTES = 240 * 1024;
+
 export const MCP_FLUSH_INTERVAL_MS = 1000;
 
 export const MCP_INTENT_PARAMETER = "_intent";
