@@ -10,6 +10,8 @@ export interface McpPeerInfo {
 export interface McpToolListing {
   name: string;
   description?: string;
+  /** The `ui://` resource an MCP Apps host renders for this tool. */
+  uiResource?: string;
 }
 
 export interface McpEvent {
@@ -30,6 +32,8 @@ export interface McpEvent {
   model?: string;
   arguments?: string;
   response?: string;
+  /** The user's answer to an elicitation: `accept`, `decline` or `cancel`. */
+  outcome?: string;
   tools?: McpToolListing[];
 }
 

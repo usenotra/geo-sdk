@@ -399,18 +399,18 @@ const server = new McpServer({ name: "acme", version: "1.0.0" });
 
 await server.connect(
   trackMcpTransport(new StdioServerTransport(), {
-    token: process.env.NOTRA_GEO_TOKEN,
+    token: process.env.NOTRA_GEO_TOKEN ?? "",
   })
 );
 ```
 
-Each event carries the method, the tool, resource or prompt name, the status (`ok`, `tool_error` when a tool returns `isError`, or `rpc_error` with the JSON-RPC error code and message), latency, response size, the `Mcp-Session-Id` (or a per-connection id on stdio), and the client and server names, versions and protocol version from `initialize`. Each `tools/list` answer also records the advertised tool names and descriptions, so the dashboard can show tools that are never called. Events are sent in batches of up to 100, at most once a second. Every event counts toward the same monthly AI traffic events quota as page tracking.
+Each event carries the method, the tool, resource or prompt name, the status (`ok`, `tool_error` when a tool returns `isError`, or `rpc_error` with the JSON-RPC error code and message), latency, response size, the `Mcp-Session-Id` (or a per-connection id on stdio), and the client and server names, versions and protocol version from `initialize`. Each `tools/list` answer also records the advertised tool names and descriptions, so the dashboard can show tools that are never called, plus the `ui://` resource of tools that ship an MCP Apps interface. Reads of `ui://` resources count as interface renders. Requests your server sends to the client (`elicitation/create`, `sampling/createMessage`, `roots/list`) are reported too, tied to the tool call that triggered them; elicitations also record whether the user accepted, declined or cancelled. Pass `relatedRequestId` when you call `elicitInput` so the event knows its tool. Events are buffered for up to a second and sent in batches of up to 100; reaching 100 queued events sends them right away. Every event counts toward the same monthly AI traffic events quota as page tracking.
 
 Arguments and results never leave your server unless you opt in:
 
 ```ts
 trackMcpTransport(transport, {
-  token: process.env.NOTRA_GEO_TOKEN,
+  token: process.env.NOTRA_GEO_TOKEN ?? "",
   // Adds optional `_intent` and `_model` parameters to every tool and strips
   // them before your handler runs, so agents can say why they call a tool.
   contextParameters: true,

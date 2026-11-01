@@ -37,11 +37,8 @@ function readPeer(value: unknown): McpPeerInfo | undefined {
   return { name: readString(value.name), version: readString(value.version) };
 }
 
-function readId(message: Record<string, unknown>): string | undefined {
-  const { id } = message;
-  return typeof id === "string" || typeof id === "number"
-    ? String(id)
-    : undefined;
+function readRequestId(id: unknown): string | number | undefined {
+  return typeof id === "string" || typeof id === "number" ? id : undefined;
 }
 
 function readTarget(params: Record<string, unknown>): string | undefined {
@@ -63,6 +60,14 @@ function takeContextValue(
   return value;
 }
 
+function readUiResource(tool: Record<string, unknown>): string | undefined {
+  const meta = isRecord(tool._meta) ? tool._meta : {};
+  const ui = isRecord(meta.ui) ? meta.ui : {};
+  return (
+    readString(ui.resourceUri) ?? readString(meta["ui/resourceUri"])
+  )?.slice(0, MCP_TARGET_MAX_LENGTH);
+}
+
 function readToolListing(result: Record<string, unknown>): McpToolListing[] {
   if (!Array.isArray(result.tools)) {
     return [];
@@ -77,6 +82,7 @@ function readToolListing(result: Record<string, unknown>): McpToolListing[] {
               0,
               MCP_TOOL_DESCRIPTION_MAX_LENGTH
             ),
+            uiResource: readUiResource(tool),
           },
         ]
       : [];
@@ -139,7 +145,8 @@ function eachMessage(
 /**
  * Wraps an MCP transport (stdio, Streamable HTTP, SSE or any object with
  * `send` and `onmessage`) and reports one event per JSON-RPC request the
- * server answers, in batches. Arguments and results stay in the process
+ * server answers, plus one per request the server sends to the client
+ * (elicitation, sampling, roots), in batches. Arguments and results stay in the process
  * unless `captureArguments` or `captureResponses` is set.
  */
 export function trackMcpTransport<T extends McpTransportLike>(
@@ -154,7 +161,8 @@ export function trackMcpTransport<T extends McpTransportLike>(
     options.excludeMethods ?? DEFAULT_MCP_EXCLUDED_METHODS
   );
   const batcher = new McpBatcher(options);
-  const pending = new Map<string, McpPendingRequest>();
+  const pending = new Map<string | number, McpPendingRequest>();
+  const outgoing = new Map<string | number, McpPendingRequest>();
   const fallbackSessionId = crypto.randomUUID();
   let client: McpPeerInfo | undefined;
   let server: McpPeerInfo | undefined;
@@ -172,7 +180,7 @@ export function trackMcpTransport<T extends McpTransportLike>(
   };
 
   const observeRequest = (message: Record<string, unknown>, extra: unknown) => {
-    const id = readId(message);
+    const id = readRequestId(message.id);
     const method = readString(message.method);
     if (id === undefined || method === undefined) {
       return;
@@ -183,12 +191,13 @@ export function trackMcpTransport<T extends McpTransportLike>(
       protocolVersion = readString(params.protocolVersion);
     }
     const args = isRecord(params.arguments) ? params.arguments : undefined;
+    const strip = options.contextParameters && method === "tools/call";
     const intent =
-      options.contextParameters && args
+      strip && args
         ? takeContextValue(args, MCP_INTENT_PARAMETER)
         : undefined;
     const model =
-      options.contextParameters && args
+      strip && args
         ? takeContextValue(args, MCP_MODEL_PARAMETER)
         : undefined;
     if (excluded.has(method)) {
@@ -209,17 +218,10 @@ export function trackMcpTransport<T extends McpTransportLike>(
     });
   };
 
-  const observeResponse = (message: Record<string, unknown>) => {
-    const id = readId(message);
-    if (id === undefined || "method" in message) {
-      return;
-    }
-    const request = pending.get(id);
-    if (!request) {
-      return;
-    }
-    pending.delete(id);
-
+  const finish = (
+    request: McpPendingRequest,
+    message: Record<string, unknown>
+  ) => {
     const event: McpEvent = {
       timestamp: request.timestamp,
       sessionId: transport.sessionId ?? fallbackSessionId,
@@ -243,7 +245,6 @@ export function trackMcpTransport<T extends McpTransportLike>(
       );
     } else if (isRecord(message.result)) {
       const { result } = message;
-      event.responseBytes = byteLength(result);
       if (request.method === "initialize") {
         server = readPeer(result.serverInfo);
         protocolVersion = readString(result.protocolVersion) ?? protocolVersion;
@@ -253,6 +254,10 @@ export function trackMcpTransport<T extends McpTransportLike>(
         if (options.contextParameters) {
           addContextParameters(result);
         }
+      }
+      event.responseBytes = byteLength(result);
+      if (request.method === "elicitation/create") {
+        event.outcome = readString(result.action);
       }
       if (result.isError === true) {
         event.status = "tool_error";
@@ -269,10 +274,63 @@ export function trackMcpTransport<T extends McpTransportLike>(
     report({ ...event, protocolVersion, server, client });
   };
 
+  const observeResponse = (message: Record<string, unknown>) => {
+    const id = readRequestId(message.id);
+    if (id === undefined || "method" in message) {
+      return;
+    }
+    const request = pending.get(id);
+    if (request) {
+      pending.delete(id);
+      finish(request, message);
+    }
+  };
+
+  const observeClientResponse = (message: Record<string, unknown>) => {
+    const id = readRequestId(message.id);
+    if (id === undefined || "method" in message) {
+      return;
+    }
+    const request = outgoing.get(id);
+    if (request) {
+      outgoing.delete(id);
+      finish(request, message);
+    }
+  };
+
+  const observeServerRequest = (
+    message: Record<string, unknown>,
+    sendOptions: unknown
+  ) => {
+    const id = readRequestId(message.id);
+    const method = readString(message.method);
+    if (id === undefined || method === undefined || excluded.has(method)) {
+      return;
+    }
+    const relatedId = isRecord(sendOptions)
+      ? readRequestId(sendOptions.relatedRequestId)
+      : undefined;
+    const related = relatedId === undefined ? undefined : pending.get(relatedId);
+    const params = isRecord(message.params) ? message.params : undefined;
+    outgoing.set(id, {
+      method,
+      target: related?.target,
+      startedAt: performance.now(),
+      timestamp: new Date().toISOString(),
+      userId: related?.userId,
+      intent: related?.intent,
+      model: related?.model,
+      arguments: options.captureArguments ? captureJson(params) : undefined,
+    });
+  };
+
   let handler = transport.onmessage;
   const onIncoming = (message: unknown, extra?: unknown) => {
     try {
-      eachMessage(message, (item) => observeRequest(item, extra));
+      eachMessage(message, (item) => {
+        observeRequest(item, extra);
+        observeClientResponse(item);
+      });
     } catch (error) {
       reportGeoError(options.onError, error);
     }
@@ -293,7 +351,10 @@ export function trackMcpTransport<T extends McpTransportLike>(
     writable: true,
     value: (message: unknown, sendOptions?: unknown) => {
       try {
-        eachMessage(message, observeResponse);
+        eachMessage(message, (item) => {
+          observeResponse(item);
+          observeServerRequest(item, sendOptions);
+        });
       } catch (error) {
         reportGeoError(options.onError, error);
       }
@@ -307,7 +368,7 @@ export function trackMcpTransport<T extends McpTransportLike>(
       configurable: true,
       writable: true,
       value: async () => {
-        await batcher.flush();
+        await batcher.close();
         await close();
       },
     });
