@@ -386,6 +386,47 @@ registerFeedbackTool(server, {
 
 Outside of MCP, `submitFeedback(input, { url })` posts a single entry and resolves with `{ id, deduplicated }`. The MCP helper needs `zod` (already required by the MCP SDK); the plain client has no dependencies.
 
+## MCP server analytics
+
+`@usenotra/geo/mcp` reports every JSON-RPC request your MCP server answers to the MCP server tab under Analytics. Wrap the transport before you connect it. This works with stdio, Streamable HTTP, SSE and any transport that exposes `send` and `onmessage`.
+
+```ts
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { trackMcpTransport } from "@usenotra/geo/mcp";
+
+const server = new McpServer({ name: "acme", version: "1.0.0" });
+
+await server.connect(
+  trackMcpTransport(new StdioServerTransport(), {
+    token: process.env.NOTRA_GEO_TOKEN ?? "",
+  })
+);
+```
+
+Each event carries the method, the tool, resource or prompt name, the status (`ok`, `tool_error` when a tool returns `isError`, or `rpc_error` with the JSON-RPC error code and message), latency, response size, the `Mcp-Session-Id` (or a per-connection id on stdio), and the client and server names, versions and protocol version from `initialize`. Each `tools/list` answer also records the advertised tool names and descriptions, so the dashboard can show tools that are never called, plus the `ui://` resource of tools that ship an MCP Apps interface. Reads of `ui://` resources count as interface renders. Requests your server sends to the client (`elicitation/create`, `sampling/createMessage`, `roots/list`) are reported too, tied to the tool call that triggered them; elicitations also record whether the user accepted, declined or cancelled. Pass `relatedRequestId` when you call `elicitInput` so the event knows its tool. Events are buffered for up to a second and sent in batches of up to 100 events or 240 KB. Reaching 100 queued events sends them right away. An event that is too large on its own loses its captured arguments and response first, then its tool descriptions. Every event counts toward the same monthly AI traffic events quota as page tracking.
+
+Arguments and results never leave your server unless you opt in:
+
+```ts
+trackMcpTransport(transport, {
+  token: process.env.NOTRA_GEO_TOKEN ?? "",
+  // Adds optional `_intent` and `_model` parameters to every tool and strips
+  // them before your handler runs, so agents can say why they call a tool.
+  contextParameters: true,
+  // Records arguments and tool results with keys like `token` or `password`
+  // redacted and long strings clipped.
+  captureArguments: true,
+  captureResponses: true,
+  // Attributes calls to your own users, for example from OAuth.
+  identify: ({ authInfo }) => authInfo?.clientId,
+  // Edits or drops an event before it is sent.
+  beforeSend: (event) => (event.target === "internal_tool" ? null : event),
+});
+```
+
+`ping` is skipped by default; pass `excludeMethods` to change that. Closing the transport sends the remaining events. On serverless runtimes pass `waitUntil`, or `await flushMcpEvents()` before the function returns.
+
 ## License
 
 MIT. Copyright (c) 2026 Notra, Inc. See [LICENSE](./LICENSE).

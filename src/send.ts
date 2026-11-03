@@ -1,4 +1,5 @@
 import { DEFAULT_ENDPOINT, INGEST_PATH, INGEST_TIMEOUT_MS } from "./constants";
+import type { McpEventBatch } from "./mcp/types";
 import type { GeoRequestPayload, GeoTrackerOptions } from "./types";
 
 function ingestUrl(endpoint: string | undefined): string {
@@ -12,8 +13,8 @@ function ingestUrl(endpoint: string | undefined): string {
 }
 
 export async function sendRequestLog(
-  payload: GeoRequestPayload,
-  options: GeoTrackerOptions
+  payload: GeoRequestPayload | McpEventBatch,
+  options: Pick<GeoTrackerOptions, "token" | "endpoint" | "fetch" | "onError">
 ): Promise<void> {
   const send = options.fetch ?? globalThis.fetch;
 
