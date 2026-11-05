@@ -142,6 +142,23 @@ function eachMessage(
   }
 }
 
+function findSetter(
+  target: object,
+  key: PropertyKey
+): ((value: unknown) => void) | undefined {
+  for (
+    let owner: object | null = target;
+    owner;
+    owner = Object.getPrototypeOf(owner)
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(owner, key);
+    if (descriptor) {
+      return descriptor.set;
+    }
+  }
+  return undefined;
+}
+
 /**
  * Wraps an MCP transport (stdio, Streamable HTTP, SSE or any object with
  * `send` and `onmessage`) and reports one event per JSON-RPC request the
@@ -340,14 +357,22 @@ export function trackMcpTransport<T extends McpTransportLike>(
     }
     handler?.call(transport, message, extra);
   };
+  // Transports such as NodeStreamableHTTPServerTransport implement onmessage
+  // as an accessor that hands the handler to an inner transport. The own
+  // property below shadows it, so keep feeding the original setter.
+  const setInner = findSetter(transport, "onmessage");
   Object.defineProperty(transport, "onmessage", {
     configurable: true,
     enumerable: true,
     get: () => (handler ? onIncoming : undefined),
     set: (value: McpTransportLike["onmessage"]) => {
       handler = value;
+      setInner?.call(transport, value ? onIncoming : undefined);
     },
   });
+  if (handler) {
+    setInner?.call(transport, onIncoming);
+  }
 
   const send = transport.send.bind(transport);
   Object.defineProperty(transport, "send", {
