@@ -22,6 +22,8 @@ import type {
   McpTransportLike,
 } from "./types";
 
+const trackedTransports = new WeakSet<McpTransportLike>();
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -164,15 +166,17 @@ function findSetter(
  * `send` and `onmessage`) and reports one event per JSON-RPC request the
  * server answers, plus one per request the server sends to the client
  * (elicitation, sampling, roots), in batches. Arguments and results stay in the process
- * unless `captureArguments` or `captureResponses` is set.
+ * unless `captureArguments` or `captureResponses` is set. Tracking a
+ * transport that is already tracked returns it unchanged.
  */
 export function trackMcpTransport<T extends McpTransportLike>(
   transport: T,
   options: McpAnalyticsOptions
 ): T {
-  if (!options.token) {
+  if (!options.token || trackedTransports.has(transport)) {
     return transport;
   }
+  trackedTransports.add(transport);
 
   const excluded = new Set(
     options.excludeMethods ?? DEFAULT_MCP_EXCLUDED_METHODS

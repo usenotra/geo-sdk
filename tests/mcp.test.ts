@@ -126,6 +126,22 @@ test("clearing the handler clears it on the delegated transport", () => {
   expect(tracked.onmessage).toBeUndefined();
 });
 
+test("tracking a transport twice delivers and reports each message once", async () => {
+  const transport = new PlainTransport();
+  const received: unknown[] = [];
+  transport.onmessage = (message) => received.push(message);
+
+  const { bodies } = trackEvents(transport);
+  trackEvents(transport);
+  transport.receive(initialize);
+  await transport.send(initializeResult);
+  await flushMcpEvents();
+
+  expect(received).toEqual([initialize]);
+  expect(bodies).toHaveLength(1);
+  expect(JSON.parse(bodies[0] ?? "").events).toHaveLength(1);
+});
+
 test("messages reach the handler of a transport with a plain onmessage field", () => {
   const transport = new PlainTransport();
   const { tracked } = trackEvents(transport);
