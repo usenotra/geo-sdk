@@ -22,6 +22,8 @@ import type {
   McpTransportLike,
 } from "./types";
 
+const trackedTransports = new WeakSet<McpTransportLike>();
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -142,20 +144,39 @@ function eachMessage(
   }
 }
 
+function findSetter(
+  target: object,
+  key: PropertyKey
+): ((value: unknown) => void) | undefined {
+  for (
+    let owner: object | null = target;
+    owner;
+    owner = Object.getPrototypeOf(owner)
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(owner, key);
+    if (descriptor) {
+      return descriptor.set;
+    }
+  }
+  return undefined;
+}
+
 /**
  * Wraps an MCP transport (stdio, Streamable HTTP, SSE or any object with
  * `send` and `onmessage`) and reports one event per JSON-RPC request the
  * server answers, plus one per request the server sends to the client
  * (elicitation, sampling, roots), in batches. Arguments and results stay in the process
- * unless `captureArguments` or `captureResponses` is set.
+ * unless `captureArguments` or `captureResponses` is set. Tracking a
+ * transport that is already tracked returns it unchanged.
  */
 export function trackMcpTransport<T extends McpTransportLike>(
   transport: T,
   options: McpAnalyticsOptions
 ): T {
-  if (!options.token) {
+  if (!options.token || trackedTransports.has(transport)) {
     return transport;
   }
+  trackedTransports.add(transport);
 
   const excluded = new Set(
     options.excludeMethods ?? DEFAULT_MCP_EXCLUDED_METHODS
@@ -340,14 +361,22 @@ export function trackMcpTransport<T extends McpTransportLike>(
     }
     handler?.call(transport, message, extra);
   };
+  // Transports such as NodeStreamableHTTPServerTransport implement onmessage
+  // as an accessor that hands the handler to an inner transport. The own
+  // property below shadows it, so keep feeding the original setter.
+  const setInner = findSetter(transport, "onmessage");
   Object.defineProperty(transport, "onmessage", {
     configurable: true,
     enumerable: true,
     get: () => (handler ? onIncoming : undefined),
     set: (value: McpTransportLike["onmessage"]) => {
       handler = value;
+      setInner?.call(transport, value ? onIncoming : undefined);
     },
   });
+  if (handler) {
+    setInner?.call(transport, onIncoming);
+  }
 
   const send = transport.send.bind(transport);
   Object.defineProperty(transport, "send", {
