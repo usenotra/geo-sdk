@@ -654,13 +654,4 @@ export const AI_AGENT_SIGNATURES: readonly AiAgentSignature[] = [
     source:
       "https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json",
   },
-  {
-    agent: "xAI-SearchBot",
-    vendor: "xAI",
-    category: "search-index",
-    userAgents: ["xAI-SearchBot"],
-    confidence: "reported",
-    verification: null,
-    source: "https://aicrawlercheck.com/blog/grok-xai-crawler-guide",
-  },
 ];
