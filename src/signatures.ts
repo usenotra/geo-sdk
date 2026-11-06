@@ -644,4 +644,14 @@ export const AI_AGENT_SIGNATURES: readonly AiAgentSignature[] = [
     verification: null,
     source: "https://docs.firecrawl.dev/advanced-scraping-guide",
   },
+  {
+    agent: "GrokBot",
+    vendor: "xAI",
+    category: "search-index",
+    userAgents: ["GrokBot"],
+    confidence: "reported",
+    verification: null,
+    source:
+      "https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json",
+  },
 ];
