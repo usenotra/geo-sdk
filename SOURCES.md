@@ -31,6 +31,11 @@ those checks.
 
 Last fully audited: **2026-08-22** (previous full audit 2026-08-05).
 
+- 2026-11-06: added xAI's `GrokBot` and `xAI-SearchBot` as `reported` tokens.
+  xAI's developer docs (checked in full via `docs.x.ai/llms-full.txt`) name no
+  crawler user agent, robots.txt policy or IP ranges for Grok's web search
+  fetches. The separate Grok Bot agent browses with a normal browser user agent
+  from shared egress IPs that xAI hands out only on request, so no token matches it.
 - 2026-08-30: added Parallel's vendor-documented `ShapBot` search crawler and
   published IP list plus its user-triggered `Shap-User` fetcher. Split Exa's
   vendor-documented, Web Bot Auth-signed `ExaSearchBot` from the legacy reported
@@ -46,7 +51,7 @@ Last fully audited: **2026-08-22** (previous full audit 2026-08-05).
   OpenCode's fallback) and ten `reported` catalog tokens for major AI assistants and
   AI data providers. OpenAI, Anthropic and Perplexity publish no new tokens since the
   previous audit; `OAI-AdsBot` and Meta's crawlers were explicitly re-verified.
-- Total shipped signatures: 66.
+- Total shipped signatures: 68.
 
 - All 63 signatures shipped at the full audit and every matched token were checked
   against the cited evidence below.
@@ -129,6 +134,8 @@ Last fully audited: **2026-08-22** (previous full audit 2026-08-05).
 | Shap-User | Parallel | assistant-browse | `Shap-User` | verified | [Parallel bot docs](https://parallel.ai/parallel-web-systems-bots) | — |
 | TavilyBot | Tavily | search-index | `TavilyBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
 | FirecrawlAgent | Firecrawl | search-index | `FirecrawlAgent` | heuristic | [Firecrawl scraping guide](https://docs.firecrawl.dev/advanced-scraping-guide) | No fixed outbound IPs |
+| GrokBot | xAI | search-index | `GrokBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | None published |
+| xAI-SearchBot | xAI | search-index | `xAI-SearchBot` | reported | [AI Crawler Check Grok guide](https://aicrawlercheck.com/blog/grok-xai-crawler-guide) | None published |
 
 ## Matching and ordering notes
 
