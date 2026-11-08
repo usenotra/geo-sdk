@@ -18,9 +18,11 @@
     "netlify",
     "nextjs",
     "nuxt",
+    "react",
     "react-router",
     "sveltekit",
-    "tanstack"
+    "tanstack",
+    "web-analytics"
   ],
   "homepage": "https://github.com/usenotra/geo-sdk#readme",
   "license": "MIT",
@@ -89,6 +91,14 @@
     "./mcp": {
       "types": "./dist/mcp.d.ts",
       "default": "./dist/mcp.js"
+    },
+    "./script": {
+      "types": "./dist/script.d.ts",
+      "default": "./dist/script.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
     }
   },
   "publishConfig": {
@@ -103,14 +113,22 @@
   },
   "devDependencies": {
     "@tanstack/react-start": "1.168.60",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "tsup": "^8.5.1",
     "typescript": "6.0.3",
     "zod": "^4.6.5"
   },
   "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
     "zod": "^4.0.0"
   },
   "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
     "zod": {
       "optional": true
     }
