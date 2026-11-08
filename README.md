@@ -427,6 +427,80 @@ trackMcpTransport(transport, {
 
 `ping` is skipped by default; pass `excludeMethods` to change that. Closing the transport sends the remaining events. On serverless runtimes pass `waitUntil`, or `await flushMcpEvents()` before the function returns.
 
+## Web analytics script
+
+`notra.js` counts the people who visit your site, without cookies. The helpers below write its script tag for you. By default the tag loads the build pinned in this SDK release with its Subresource Integrity hash, so the browser refuses to run the script if a single byte changes. A new SDK release pins the newest build; update the package to move to it.
+
+Web analytics is in private beta: it needs the `web-analytics` beta turned on for your workspace, and until then page views are not counted. Copy your project's public web key (`nwk.…`) from the script tag under **Settings → Tracking**. It is not a secret.
+
+### React and Next.js
+
+```tsx
+// app/layout.tsx
+import { NotraAnalytics } from "@usenotra/geo/react";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <NotraAnalytics
+          webKey="nwk.…"
+          disabled={process.env.NODE_ENV !== "production"}
+        />
+      </body>
+    </html>
+  );
+}
+```
+
+`NotraAnalytics` uses no hooks and needs no `"use client"`, so it renders in Server Components, in SSR and in Next.js App Router root layouts. Put it once in your root layout, inside `<head>` or `<body>`. It renders an `async` script: React 19 moves `async` scripts into `<head>`, renders the same `src` only once, and runs it when it is first rendered on the client. React never runs other `<script>` elements it renders on the client, and React 18 does not run this one either, so on React 18 keep it in a layout that is server rendered. `disabled` renders nothing.
+
+### Plain HTML, Astro and other templates
+
+```astro
+---
+// src/layouts/Base.astro
+import { notraScriptTag } from "@usenotra/geo/script";
+
+const notra = notraScriptTag({ webKey: "nwk.…" });
+---
+<html>
+  <head>
+    <Fragment set:html={notra} />
+  </head>
+  <body><slot /></body>
+</html>
+```
+
+`notraScriptTag(options)` returns the HTML string with every value escaped:
+
+```html
+<script defer src="https://ingest.usenotra.com/api/notra.b726f8942f7a.js" data-key="nwk.…" integrity="sha384-…" crossorigin="anonymous"></script>
+```
+
+`notraScript(options)` returns the same attributes as an object (`src`, `defer`, `data-key`, `data-api`, `data-hash`, `integrity`, `crossOrigin`) for other renderers. `NOTRA_SCRIPT_RELEASE` and `NOTRA_SCRIPT_PLUS_RELEASE` hold the pinned file names and integrity values.
+
+### Script options
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `webKey` | required | The project's public web key. Must start with `nwk.`, otherwise the helpers throw |
+| `errors` | `false` | Load `notra.plus.js`, which also reports uncaught JavaScript errors |
+| `hash` | `false` | Count `#hash` route changes as page views (`data-hash`) |
+| `api` | `/api/collect` on the script's origin | Beacon endpoint (`data-api`). Set it when you proxy through your own domain |
+| `pinned` | `true` | Load the pinned build with `integrity` and `crossorigin="anonymous"`. `false` loads `/api/notra.js`, which always serves the latest build, without `integrity` |
+| `endpoint` | `https://ingest.usenotra.com` | Origin the script loads from |
+| `src` | none | Full script URL, for self-hosting. Replaces `endpoint`, `errors` and `pinned` |
+| `integrity` | the pinned build's hash | `sha384-…` value. With `src`, pass it to keep the check, for example `NOTRA_SCRIPT_RELEASE.integrity` when you serve that file unchanged |
+| `disabled` | `false` | `NotraAnalytics` only. Renders nothing |
+
+A self-hosted ingest at `endpoint` must serve the same pinned builds, or set `pinned: false`. A proxy must pass the pinned file through byte for byte; compression is fine, minifying breaks the hash.
+
+### Updating the pinned builds
+
+Maintainers run `bun run sync-script` to pin the builds the ingest serves now. It reads the version of `/api/notra.js` and `/api/notra.plus.js` from their `ETag`, downloads `/api/notra.<version>.js` and `/api/notra.plus.<version>.js`, checks each body against its version, and rewrites `src/script/releases.ts` with the `sha384` integrity values. Pass another origin as the first argument to sync from a local ingest.
+
 ## License
 
 MIT. Copyright (c) 2026 Notra, Inc. See [LICENSE](./LICENSE).
