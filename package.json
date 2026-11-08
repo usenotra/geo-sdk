@@ -109,6 +109,7 @@
     "build": "tsup",
     "test": "bun test tests",
     "check-types": "tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
+    "sync-script": "bun scripts/sync-notra-script.ts",
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
