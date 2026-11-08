@@ -16,6 +16,8 @@ export default defineConfig({
     "src/html.ts",
     "src/feedback.ts",
     "src/mcp.ts",
+    "src/script.ts",
+    "src/react.ts",
   ],
   format: ["esm"],
   outDir: "dist",
