@@ -476,7 +476,7 @@ const notra = notraScriptTag({ webKey: "nwk.…" });
 `notraScriptTag(options)` returns the HTML string with every value escaped:
 
 ```html
-<script defer src="https://js.usenotra.com/notra.ce3c872ef9c9.js" data-key="nwk.…" data-api="https://ingest.usenotra.com/api/collect" integrity="sha384-…" crossorigin="anonymous"></script>
+<script defer src="https://static.usenotra.com/notra.ce3c872ef9c9.js" data-key="nwk.…" data-api="https://ingest.usenotra.com/api/collect" integrity="sha384-…" crossorigin="anonymous"></script>
 ```
 
 `notraScript(options)` returns the same attributes as an object (`src`, `defer`, `data-key`, `data-api`, `data-hash`, `integrity`, `crossOrigin`) for other renderers. `NOTRA_SCRIPT_RELEASE` and `NOTRA_SCRIPT_PLUS_RELEASE` hold the pinned file names and integrity values.
@@ -490,12 +490,12 @@ const notra = notraScriptTag({ webKey: "nwk.…" });
 | `hash` | `false` | Count `#hash` route changes as page views (`data-hash`) |
 | `api` | `https://ingest.usenotra.com/api/collect`; with `endpoint` or `src`, `/api/collect` on the script's origin | Beacon endpoint (`data-api`). Set it when you proxy page views through your own domain |
 | `pinned` | `true` | Load the pinned build with `integrity` and `crossorigin="anonymous"`. `false` loads `notra.js`, which always serves the latest build, without `integrity` |
-| `endpoint` | Notra's script host, `https://js.usenotra.com` | Origin of a self-hosted ingest or proxy that serves the script at `/api/notra.js` and takes page views at `/api/collect` |
+| `endpoint` | Notra's script host, `https://static.usenotra.com` | Origin of a self-hosted ingest or proxy that serves the script at `/api/notra.js` and takes page views at `/api/collect` |
 | `src` | none | Full script URL, for self-hosting. Replaces `endpoint`, `errors` and `pinned` |
 | `integrity` | the pinned build's hash | `sha384-…` value. With `src`, pass it to keep the check, for example `NOTRA_SCRIPT_RELEASE.integrity` when you serve that file unchanged |
 | `disabled` | `false` | `NotraAnalytics` only. Renders nothing |
 
-By default the script loads from `js.usenotra.com`, Notra's script host on Cloudflare's edge, and page views go to `ingest.usenotra.com`. For a Content-Security-Policy, allow `script-src https://js.usenotra.com` and `connect-src https://ingest.usenotra.com`.
+By default the script loads from `static.usenotra.com`, Notra's script host on Cloudflare's edge, and page views go to `ingest.usenotra.com`. For a Content-Security-Policy, allow `script-src https://static.usenotra.com` and `connect-src https://ingest.usenotra.com`.
 
 A self-hosted ingest at `endpoint` must serve the same pinned builds, or set `pinned: false`. A proxy must pass the pinned file through byte for byte; compression is fine, minifying breaks the hash.
 

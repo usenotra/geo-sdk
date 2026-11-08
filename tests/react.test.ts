@@ -12,7 +12,7 @@ describe("NotraAnalytics", () => {
     expect(
       renderToStaticMarkup(createElement(NotraAnalytics, { webKey }))
     ).toBe(
-      `<script src="https://js.usenotra.com/notra.ce3c872ef9c9.js" data-key="${webKey}" data-api="https://ingest.usenotra.com/api/collect" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous" async=""></script>`
+      `<script src="https://static.usenotra.com/notra.ce3c872ef9c9.js" data-key="${webKey}" data-api="https://ingest.usenotra.com/api/collect" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous" async=""></script>`
     );
   });
 
@@ -28,7 +28,7 @@ describe("NotraAnalytics", () => {
         })
       )
     ).toBe(
-      `<script src="https://js.usenotra.com/notra.plus.js" data-key="${webKey}" data-api="/notra/collect" data-hash="" async=""></script>`
+      `<script src="https://static.usenotra.com/notra.plus.js" data-key="${webKey}" data-api="/notra/collect" data-hash="" async=""></script>`
     );
   });
 

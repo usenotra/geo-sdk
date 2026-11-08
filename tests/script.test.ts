@@ -12,7 +12,7 @@ const webKey = "nwk.org.project.0000";
 describe("notraScript", () => {
   test("loads the pinned build with its integrity by default", () => {
     expect(notraScript({ webKey })).toEqual({
-      src: `https://js.usenotra.com/${NOTRA_SCRIPT_RELEASE.file}`,
+      src: `https://static.usenotra.com/${NOTRA_SCRIPT_RELEASE.file}`,
       integrity: NOTRA_SCRIPT_RELEASE.integrity,
       crossOrigin: "anonymous",
       defer: true,
@@ -37,20 +37,20 @@ describe("notraScript", () => {
   test("loads the pinned plus build with errors", () => {
     const attributes = notraScript({ webKey, errors: true });
     expect(attributes.src).toBe(
-      "https://js.usenotra.com/notra.plus.d703b9cc5508.js"
+      "https://static.usenotra.com/notra.plus.d703b9cc5508.js"
     );
     expect(attributes.integrity).toBe(NOTRA_SCRIPT_PLUS_RELEASE.integrity);
   });
 
   test("loads the latest build without integrity when unpinned", () => {
     expect(notraScript({ webKey, pinned: false })).toEqual({
-      src: "https://js.usenotra.com/notra.js",
+      src: "https://static.usenotra.com/notra.js",
       defer: true,
       "data-key": webKey,
       "data-api": "https://ingest.usenotra.com/api/collect",
     });
     expect(notraScript({ webKey, pinned: false, errors: true }).src).toBe(
-      "https://js.usenotra.com/notra.plus.js"
+      "https://static.usenotra.com/notra.plus.js"
     );
   });
 
@@ -112,7 +112,7 @@ describe("notraScript", () => {
 describe("notraScriptTag", () => {
   test("renders the pinned tag", () => {
     expect(notraScriptTag({ webKey })).toBe(
-      `<script defer src="https://js.usenotra.com/notra.ce3c872ef9c9.js" data-key="${webKey}" data-api="https://ingest.usenotra.com/api/collect" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous"></script>`
+      `<script defer src="https://static.usenotra.com/notra.ce3c872ef9c9.js" data-key="${webKey}" data-api="https://ingest.usenotra.com/api/collect" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous"></script>`
     );
   });
 
@@ -126,7 +126,7 @@ describe("notraScriptTag", () => {
         api: "/notra/collect",
       })
     ).toBe(
-      `<script defer src="https://js.usenotra.com/notra.plus.js" data-key="${webKey}" data-api="/notra/collect" data-hash></script>`
+      `<script defer src="https://static.usenotra.com/notra.plus.js" data-key="${webKey}" data-api="/notra/collect" data-hash></script>`
     );
   });
 

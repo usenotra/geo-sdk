@@ -14,7 +14,7 @@ export interface NotraScriptOptions {
   pinned?: boolean;
   /**
    * Origin of a self-hosted ingest or proxy that serves the script at
-   * `/api/notra.js`. Defaults to Notra's script host, `https://js.usenotra.com`.
+   * `/api/notra.js`. Defaults to Notra's script host, `https://static.usenotra.com`.
    */
   endpoint?: string;
   /** Full script URL, for self-hosting. Overrides `endpoint`, `errors` and `pinned`. */
