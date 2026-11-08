@@ -476,7 +476,7 @@ const notra = notraScriptTag({ webKey: "nwk.…" });
 `notraScriptTag(options)` returns the HTML string with every value escaped:
 
 ```html
-<script defer src="https://ingest.usenotra.com/api/notra.b726f8942f7a.js" data-key="nwk.…" integrity="sha384-…" crossorigin="anonymous"></script>
+<script defer src="https://ingest.usenotra.com/api/notra.ce3c872ef9c9.js" data-key="nwk.…" integrity="sha384-…" crossorigin="anonymous"></script>
 ```
 
 `notraScript(options)` returns the same attributes as an object (`src`, `defer`, `data-key`, `data-api`, `data-hash`, `integrity`, `crossOrigin`) for other renderers. `NOTRA_SCRIPT_RELEASE` and `NOTRA_SCRIPT_PLUS_RELEASE` hold the pinned file names and integrity values.

@@ -2,13 +2,13 @@
 import type { NotraScriptRelease } from "./types";
 
 export const NOTRA_SCRIPT_RELEASE: NotraScriptRelease = {
-  file: "notra.b726f8942f7a.js",
+  file: "notra.ce3c872ef9c9.js",
   integrity:
-    "sha384-NkNYBATI8Lk8WNUX6Ii8XPRbBNa4mdFs4VYItz/cMOymrBJrgGzLXEoMdMZwedjQ",
+    "sha384-LuUp5Hj+rSQ4/mZp1sWBOrJDHIHKGqflwF1GYIreqmWdCaI1otOQealWJGRj6Toj",
 };
 
 export const NOTRA_SCRIPT_PLUS_RELEASE: NotraScriptRelease = {
-  file: "notra.plus.9ebb5695502f.js",
+  file: "notra.plus.d703b9cc5508.js",
   integrity:
-    "sha384-GxUfsC2DU1prFPgRUns0m3mqLUFhTcajaGs2ZlGrJs2nr+/7SIE/31/yTE+jmq1L",
+    "sha384-MgLdHKufD0WdkO4pxtkT/bbNCKxl6PxOyUJe+M/qwFGfjOdZ5rEnljxTlOVQIzF+",
 };

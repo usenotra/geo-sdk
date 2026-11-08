@@ -12,7 +12,7 @@ describe("NotraAnalytics", () => {
     expect(
       renderToStaticMarkup(createElement(NotraAnalytics, { webKey }))
     ).toBe(
-      `<script src="https://ingest.usenotra.com/api/notra.b726f8942f7a.js" data-key="${webKey}" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous" async=""></script>`
+      `<script src="https://ingest.usenotra.com/api/notra.ce3c872ef9c9.js" data-key="${webKey}" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous" async=""></script>`
     );
   });
 

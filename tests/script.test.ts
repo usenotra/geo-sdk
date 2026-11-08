@@ -20,23 +20,23 @@ describe("notraScript", () => {
     });
   });
 
-  test("pins notra.b726f8942f7a.js and notra.plus.9ebb5695502f.js", () => {
+  test("pins notra.ce3c872ef9c9.js and notra.plus.d703b9cc5508.js", () => {
     expect(NOTRA_SCRIPT_RELEASE).toEqual({
-      file: "notra.b726f8942f7a.js",
+      file: "notra.ce3c872ef9c9.js",
       integrity:
-        "sha384-NkNYBATI8Lk8WNUX6Ii8XPRbBNa4mdFs4VYItz/cMOymrBJrgGzLXEoMdMZwedjQ",
+        "sha384-LuUp5Hj+rSQ4/mZp1sWBOrJDHIHKGqflwF1GYIreqmWdCaI1otOQealWJGRj6Toj",
     });
     expect(NOTRA_SCRIPT_PLUS_RELEASE).toEqual({
-      file: "notra.plus.9ebb5695502f.js",
+      file: "notra.plus.d703b9cc5508.js",
       integrity:
-        "sha384-GxUfsC2DU1prFPgRUns0m3mqLUFhTcajaGs2ZlGrJs2nr+/7SIE/31/yTE+jmq1L",
+        "sha384-MgLdHKufD0WdkO4pxtkT/bbNCKxl6PxOyUJe+M/qwFGfjOdZ5rEnljxTlOVQIzF+",
     });
   });
 
   test("loads the pinned plus build with errors", () => {
     const attributes = notraScript({ webKey, errors: true });
     expect(attributes.src).toBe(
-      "https://ingest.usenotra.com/api/notra.plus.9ebb5695502f.js"
+      "https://ingest.usenotra.com/api/notra.plus.d703b9cc5508.js"
     );
     expect(attributes.integrity).toBe(NOTRA_SCRIPT_PLUS_RELEASE.integrity);
   });
@@ -105,7 +105,7 @@ describe("notraScript", () => {
 describe("notraScriptTag", () => {
   test("renders the pinned tag", () => {
     expect(notraScriptTag({ webKey })).toBe(
-      `<script defer src="https://ingest.usenotra.com/api/notra.b726f8942f7a.js" data-key="${webKey}" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous"></script>`
+      `<script defer src="https://ingest.usenotra.com/api/notra.ce3c872ef9c9.js" data-key="${webKey}" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous"></script>`
     );
   });
 
