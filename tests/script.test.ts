@@ -12,11 +12,12 @@ const webKey = "nwk.org.project.0000";
 describe("notraScript", () => {
   test("loads the pinned build with its integrity by default", () => {
     expect(notraScript({ webKey })).toEqual({
-      src: `https://ingest.usenotra.com/api/${NOTRA_SCRIPT_RELEASE.file}`,
+      src: `https://js.usenotra.com/${NOTRA_SCRIPT_RELEASE.file}`,
       integrity: NOTRA_SCRIPT_RELEASE.integrity,
       crossOrigin: "anonymous",
       defer: true,
       "data-key": webKey,
+      "data-api": "https://ingest.usenotra.com/api/collect",
     });
   });
 
@@ -36,19 +37,20 @@ describe("notraScript", () => {
   test("loads the pinned plus build with errors", () => {
     const attributes = notraScript({ webKey, errors: true });
     expect(attributes.src).toBe(
-      "https://ingest.usenotra.com/api/notra.plus.d703b9cc5508.js"
+      "https://js.usenotra.com/notra.plus.d703b9cc5508.js"
     );
     expect(attributes.integrity).toBe(NOTRA_SCRIPT_PLUS_RELEASE.integrity);
   });
 
   test("loads the latest build without integrity when unpinned", () => {
     expect(notraScript({ webKey, pinned: false })).toEqual({
-      src: "https://ingest.usenotra.com/api/notra.js",
+      src: "https://js.usenotra.com/notra.js",
       defer: true,
       "data-key": webKey,
+      "data-api": "https://ingest.usenotra.com/api/collect",
     });
     expect(notraScript({ webKey, pinned: false, errors: true }).src).toBe(
-      "https://ingest.usenotra.com/api/notra.plus.js"
+      "https://js.usenotra.com/notra.plus.js"
     );
   });
 
@@ -66,10 +68,15 @@ describe("notraScript", () => {
     expect("data-hash" in plain).toBe(false);
   });
 
-  test("loads from another endpoint", () => {
-    expect(
-      notraScript({ webKey, endpoint: "https://ingest.example.com//" }).src
-    ).toBe(`https://ingest.example.com/api/${NOTRA_SCRIPT_RELEASE.file}`);
+  test("a self-hosted endpoint serves the script and takes its beacons", () => {
+    const attributes = notraScript({
+      webKey,
+      endpoint: "https://ingest.example.com//",
+    });
+    expect(attributes.src).toBe(
+      `https://ingest.example.com/api/${NOTRA_SCRIPT_RELEASE.file}`
+    );
+    expect("data-api" in attributes).toBe(false);
   });
 
   test("uses a self-hosted src with only the integrity it is given", () => {
@@ -105,7 +112,7 @@ describe("notraScript", () => {
 describe("notraScriptTag", () => {
   test("renders the pinned tag", () => {
     expect(notraScriptTag({ webKey })).toBe(
-      `<script defer src="https://ingest.usenotra.com/api/notra.ce3c872ef9c9.js" data-key="${webKey}" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous"></script>`
+      `<script defer src="https://js.usenotra.com/notra.ce3c872ef9c9.js" data-key="${webKey}" data-api="https://ingest.usenotra.com/api/collect" integrity="${NOTRA_SCRIPT_RELEASE.integrity}" crossorigin="anonymous"></script>`
     );
   });
 
@@ -119,7 +126,7 @@ describe("notraScriptTag", () => {
         api: "/notra/collect",
       })
     ).toBe(
-      `<script defer src="https://ingest.usenotra.com/api/notra.plus.js" data-key="${webKey}" data-api="/notra/collect" data-hash></script>`
+      `<script defer src="https://js.usenotra.com/notra.plus.js" data-key="${webKey}" data-api="/notra/collect" data-hash></script>`
     );
   });
 

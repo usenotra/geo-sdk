@@ -1,4 +1,12 @@
+/** Where notra.js loads from by default: Notra's script host on Cloudflare's edge. */
+export const SCRIPT_HOST = "https://js.usenotra.com";
+
+/** Files sit at the root of the script host and under /api/ on an ingest. */
+export const SCRIPT_HOST_PATH = "/";
 export const SCRIPT_PATH = "/api/";
+
+/** Page views go to the ingest, not the script host. */
+export const COLLECT_PATH = "/api/collect";
 
 export const SCRIPT_FILE = "notra.js";
 

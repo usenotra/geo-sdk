@@ -5,11 +5,17 @@ export interface NotraScriptOptions {
   errors?: boolean;
   /** Count `#hash` route changes as page views. */
   hash?: boolean;
-  /** Beacon endpoint. Defaults to `/api/collect` on the script's origin. */
+  /**
+   * Beacon endpoint. Defaults to `https://ingest.usenotra.com/api/collect`, or
+   * to `/api/collect` on the script's origin with `endpoint` or `src`.
+   */
   api?: string;
   /** Load the build this SDK release pins, with its integrity hash. Defaults to true. */
   pinned?: boolean;
-  /** Origin the script loads from. Defaults to `https://ingest.usenotra.com`. */
+  /**
+   * Origin of a self-hosted ingest or proxy that serves the script at
+   * `/api/notra.js`. Defaults to Notra's script host, `https://js.usenotra.com`.
+   */
   endpoint?: string;
   /** Full script URL, for self-hosting. Overrides `endpoint`, `errors` and `pinned`. */
   src?: string;

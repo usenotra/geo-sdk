@@ -1,8 +1,11 @@
 import { DEFAULT_ENDPOINT } from "../constants";
 import {
+  COLLECT_PATH,
   INVALID_WEB_KEY_MESSAGE,
   SCRIPT_CROSS_ORIGIN,
   SCRIPT_FILE,
+  SCRIPT_HOST,
+  SCRIPT_HOST_PATH,
   SCRIPT_PATH,
   SCRIPT_PLUS_FILE,
   WEB_KEY_PREFIX,
@@ -10,13 +13,29 @@ import {
 import { NOTRA_SCRIPT_PLUS_RELEASE, NOTRA_SCRIPT_RELEASE } from "./releases";
 import type { NotraScriptAttributes, NotraScriptOptions } from "./types";
 
-function scriptOrigin(endpoint: string | undefined): string {
-  const value = endpoint ?? DEFAULT_ENDPOINT;
+function trimOrigin(value: string): string {
   let end = value.length;
   while (end > 0 && value[end - 1] === "/") {
     end -= 1;
   }
   return value.slice(0, end);
+}
+
+/**
+ * Without `endpoint` the script loads from Notra's script host and page views
+ * go to the ingest; with one, both use that origin, as a self-hosted ingest
+ * or a proxy serves the script at /api/ next to /api/collect.
+ */
+function scriptBase(endpoint: string | undefined): string {
+  return endpoint === undefined
+    ? `${SCRIPT_HOST}${SCRIPT_HOST_PATH}`
+    : `${trimOrigin(endpoint)}${SCRIPT_PATH}`;
+}
+
+function defaultApi(options: NotraScriptOptions): string | undefined {
+  return options.endpoint === undefined && options.src === undefined
+    ? `${DEFAULT_ENDPOINT}${COLLECT_PATH}`
+    : undefined;
 }
 
 function resolveSource(options: NotraScriptOptions): {
@@ -26,7 +45,7 @@ function resolveSource(options: NotraScriptOptions): {
   if (options.src) {
     return { src: options.src, integrity: options.integrity };
   }
-  const base = `${scriptOrigin(options.endpoint)}${SCRIPT_PATH}`;
+  const base = scriptBase(options.endpoint);
   if (options.pinned === false) {
     const file = options.errors ? SCRIPT_PLUS_FILE : SCRIPT_FILE;
     return { src: `${base}${file}`, integrity: options.integrity };
@@ -53,8 +72,9 @@ export function notraScript(
     defer: true,
     "data-key": options.webKey,
   };
-  if (options.api) {
-    attributes["data-api"] = options.api;
+  const api = options.api ?? defaultApi(options);
+  if (api) {
+    attributes["data-api"] = api;
   }
   if (options.hash) {
     attributes["data-hash"] = "";
