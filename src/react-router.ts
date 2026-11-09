@@ -1,21 +1,2 @@
-import { Tracker } from "./tracker";
-import type {
-  GeoReactRouterOptions,
-  ReactRouterMiddlewareArgs,
-} from "./types";
-
-export function createGeoMiddleware(options: GeoReactRouterOptions) {
-  const tracker = new Tracker(options);
-
-  return async <T>(
-    { request }: ReactRouterMiddlewareArgs,
-    next: () => Promise<T>
-  ): Promise<T> => {
-    try {
-      return await next();
-    } finally {
-      const pending = tracker.track(request).catch(() => undefined);
-      options.waitUntil?.(pending);
-    }
-  };
-}
+/** @deprecated `@usenotra/geo` moved to `@usenotra/sdk`. Import from `@usenotra/sdk/react-router`. */
+export * from "@usenotra/sdk/react-router";

@@ -1,18 +1,2 @@
-import { Tracker } from "./tracker";
-import type { GeoTrackerOptions, SvelteKitHandleInput } from "./types";
-
-export function createGeoHandle(options: GeoTrackerOptions) {
-  const tracker = new Tracker(options);
-
-  return async <TEvent extends { request: Request }, TResponse>({
-    event,
-    resolve,
-  }: SvelteKitHandleInput<TEvent, TResponse>): Promise<TResponse> => {
-    const pending = tracker.track(event.request).catch(() => undefined);
-    try {
-      return await resolve(event);
-    } finally {
-      await pending;
-    }
-  };
-}
+/** @deprecated `@usenotra/geo` moved to `@usenotra/sdk`. Import from `@usenotra/sdk/sveltekit`. */
+export * from "@usenotra/sdk/sveltekit";

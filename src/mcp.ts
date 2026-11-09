@@ -1,13 +1,2 @@
-export { flushMcpEvents } from "./mcp/batcher";
-export { DEFAULT_MCP_EXCLUDED_METHODS } from "./mcp/constants";
-export { trackMcpTransport } from "./mcp/transport";
-export type {
-  McpAnalyticsOptions,
-  McpEvent,
-  McpEventBatch,
-  McpEventStatus,
-  McpPeerInfo,
-  McpRequestContext,
-  McpToolListing,
-  McpTransportLike,
-} from "./mcp/types";
+/** @deprecated `@usenotra/geo` moved to `@usenotra/sdk`. Import from `@usenotra/sdk/mcp`. */
+export * from "@usenotra/sdk/mcp";

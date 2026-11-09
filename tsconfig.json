@@ -15,6 +15,6 @@
     "target": "ES2022",
     "types": []
   },
-  "include": ["src", "tests/types"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
