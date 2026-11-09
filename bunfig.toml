@@ -1,2 +1,4 @@
 [install]
 minimumReleaseAge = 604800
+# Our own package: this release forwards to it, so it must install as soon as it is out.
+minimumReleaseAgeExcludes = ["@usenotra/sdk"]
