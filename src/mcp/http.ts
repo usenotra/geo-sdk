@@ -10,7 +10,10 @@ import type {
 } from "./types";
 
 async function readRequestMessage(request: Request): Promise<unknown> {
-  if (request.method !== "POST") {
+  if (
+    request.method !== "POST" ||
+    !request.headers.get("content-type")?.includes("application/json")
+  ) {
     return undefined;
   }
   try {
@@ -88,6 +91,7 @@ export function trackMcpHttp(
         }
       })
       .catch((error: unknown) => reportGeoError(options.onError, error));
+    batcher.observe(settled);
     try {
       options.waitUntil?.(settled);
     } catch (error) {

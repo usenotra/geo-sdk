@@ -39,7 +39,9 @@ function readPeer(value: unknown): McpPeerInfo | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
-  return { name: readString(value.name), version: readString(value.version) };
+  const name = readString(value.name);
+  const version = readString(value.version);
+  return name || version ? { name, version } : undefined;
 }
 
 function readRequestId(id: unknown): string | number | undefined {
@@ -251,6 +253,8 @@ export function observeMcpTransport<T extends McpTransportLike>(
       intent,
       model,
       arguments: options.captureArguments ? captureJson(args) : undefined,
+      client,
+      protocolVersion,
     });
   };
 
@@ -310,7 +314,15 @@ export function observeMcpTransport<T extends McpTransportLike>(
       }
     }
 
-    report({ ...event, protocolVersion, server, client });
+    report({
+      ...event,
+      protocolVersion:
+        request.method === "initialize"
+          ? protocolVersion
+          : (request.protocolVersion ?? protocolVersion),
+      server,
+      client: request.client ?? client,
+    });
   };
 
   const observeResponse = (message: Record<string, unknown>) => {

@@ -45,6 +45,7 @@ function takeBatch(queue: McpEvent[]): McpEvent[] {
 export class McpBatcher {
   readonly #options: McpAnalyticsOptions;
   #queue: McpEvent[] = [];
+  readonly #observing = new Set<Promise<void>>();
   #timer: ReturnType<typeof setTimeout> | undefined;
   #settle: (() => void) | undefined;
 
@@ -89,6 +90,15 @@ export class McpBatcher {
     );
   }
 
+  observe(promise: Promise<void>): void {
+    this.#observing.add(promise);
+    void promise.finally(() => this.#observing.delete(promise));
+  }
+
+  async settle(): Promise<void> {
+    await Promise.all(this.#observing);
+  }
+
   async flush(): Promise<void> {
     clearTimeout(this.#timer);
     this.#timer = undefined;
@@ -122,5 +132,10 @@ export class McpBatcher {
 
 /** Sends every queued MCP event now; await it before a serverless function returns. */
 export async function flushMcpEvents(): Promise<void> {
-  await Promise.all([...batchers].map((batcher) => batcher.flush()));
+  await Promise.all(
+    [...batchers].map(async (batcher) => {
+      await batcher.settle();
+      await batcher.flush();
+    })
+  );
 }

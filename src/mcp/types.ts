@@ -90,6 +90,8 @@ export interface McpPendingRequest {
   intent?: string;
   model?: string;
   arguments?: string;
+  client?: McpPeerInfo;
+  protocolVersion?: string;
 }
 
 export type McpHttpAnalyticsOptions = Omit<
