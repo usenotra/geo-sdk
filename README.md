@@ -427,6 +427,23 @@ trackMcpTransport(transport, {
 
 `ping` is skipped by default; pass `excludeMethods` to change that. Closing the transport sends the remaining events. On serverless runtimes pass `waitUntil`, or `await flushMcpEvents()` before the function returns.
 
+### mcp-use
+
+[mcp-use](https://github.com/mcp-use/mcp-use) creates its own transports, so register `trackMcpHttp` as HTTP middleware instead. It reads each JSON-RPC request and the JSON or SSE reply on the MCP endpoint and reports the same events as `trackMcpTransport`.
+
+```ts
+import { trackMcpHttp } from "@usenotra/geo/mcp";
+import { MCPServer } from "mcp-use";
+
+const server = new MCPServer({ name: "acme", version: "1.0.0" });
+
+server.use(trackMcpHttp({ token: process.env.NOTRA_GEO_TOKEN ?? "" }));
+
+await server.listen(3000);
+```
+
+mcp-use serves MCP statelessly, so every request counts as its own session. Clients on the `2026-07-28` protocol send their name and version with every request, while older clients only send it with `initialize`, so their later calls show no client. The middleware takes the same options as `trackMcpTransport` except `contextParameters` and `identify`, because it cannot rewrite replies or see the request's OAuth identity.
+
 ## Web analytics script
 
 `notra.js` counts the people who visit your site, without cookies. The helpers below write its script tag for you. By default the tag loads the build pinned in this SDK release with its Subresource Integrity hash, so the browser refuses to run the script if a single byte changes. A new SDK release pins the newest build; update the package to move to it.

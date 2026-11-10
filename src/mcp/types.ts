@@ -90,4 +90,21 @@ export interface McpPendingRequest {
   intent?: string;
   model?: string;
   arguments?: string;
+  client?: McpPeerInfo;
+  protocolVersion?: string;
 }
+
+export type McpHttpAnalyticsOptions = Omit<
+  McpAnalyticsOptions,
+  "contextParameters" | "identify"
+>;
+
+export interface McpHttpContext {
+  req: { raw: Request };
+  res: Response;
+}
+
+export type McpHttpMiddleware = (
+  context: McpHttpContext,
+  next: () => Promise<void>
+) => Promise<void>;
