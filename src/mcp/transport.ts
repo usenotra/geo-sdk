@@ -3,12 +3,15 @@ import { McpBatcher } from "./batcher";
 import { byteLength, captureJson } from "./capture";
 import {
   DEFAULT_MCP_EXCLUDED_METHODS,
+  MCP_CLIENT_INFO_META_KEY,
   MCP_CONTEXT_VALUE_MAX_LENGTH,
   MCP_ERROR_MESSAGE_MAX_LENGTH,
   MCP_INTENT_PARAMETER,
   MCP_INTENT_PARAMETER_DESCRIPTION,
   MCP_MODEL_PARAMETER,
   MCP_MODEL_PARAMETER_DESCRIPTION,
+  MCP_PROTOCOL_VERSION_META_KEY,
+  MCP_SERVER_INFO_META_KEY,
   MCP_TARGET_MAX_LENGTH,
   MCP_TOOL_DESCRIPTION_MAX_LENGTH,
 } from "./constants";
@@ -177,11 +180,17 @@ export function trackMcpTransport<T extends McpTransportLike>(
     return transport;
   }
   trackedTransports.add(transport);
+  return observeMcpTransport(transport, options, new McpBatcher(options));
+}
 
+export function observeMcpTransport<T extends McpTransportLike>(
+  transport: T,
+  options: McpAnalyticsOptions,
+  batcher: McpBatcher
+): T {
   const excluded = new Set(
     options.excludeMethods ?? DEFAULT_MCP_EXCLUDED_METHODS
   );
-  const batcher = new McpBatcher(options);
   const pending = new Map<string | number, McpPendingRequest>();
   const outgoing = new Map<string | number, McpPendingRequest>();
   const fallbackSessionId = crypto.randomUUID();
@@ -212,6 +221,10 @@ export function trackMcpTransport<T extends McpTransportLike>(
       client = readPeer(params.clientInfo);
       protocolVersion = readString(params.protocolVersion);
     }
+    const meta = isRecord(params._meta) ? params._meta : {};
+    client = readPeer(meta[MCP_CLIENT_INFO_META_KEY]) ?? client;
+    protocolVersion =
+      readString(meta[MCP_PROTOCOL_VERSION_META_KEY]) ?? protocolVersion;
     const args = isRecord(params.arguments) ? params.arguments : undefined;
     const strip = options.contextParameters && method === "tools/call";
     const intent =
@@ -273,6 +286,8 @@ export function trackMcpTransport<T extends McpTransportLike>(
         server = readPeer(result.serverInfo);
         protocolVersion = readString(result.protocolVersion) ?? protocolVersion;
       }
+      const meta = isRecord(result._meta) ? result._meta : {};
+      server = readPeer(meta[MCP_SERVER_INFO_META_KEY]) ?? server;
       if (request.method === "tools/list") {
         event.tools = readToolListing(result);
         if (options.contextParameters) {

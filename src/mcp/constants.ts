@@ -32,3 +32,14 @@ export const MCP_REDACTED_VALUE = "[redacted]";
 
 export const MCP_SENSITIVE_KEY_PATTERN =
   /pass(word)?|secret|token|api[-_]?key|auth|cookie|credential|private|session/i;
+
+export const MCP_CLIENT_INFO_META_KEY = "io.modelcontextprotocol/clientInfo";
+
+export const MCP_SERVER_INFO_META_KEY = "io.modelcontextprotocol/serverInfo";
+
+export const MCP_PROTOCOL_VERSION_META_KEY =
+  "io.modelcontextprotocol/protocolVersion";
+
+export const MCP_SESSION_ID_HEADER = "mcp-session-id";
+
+export const MCP_SSE_DATA_PREFIX = "data:";
