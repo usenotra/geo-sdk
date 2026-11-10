@@ -65,7 +65,9 @@ export class McpBatcher {
     }
     this.#queue.push(fitted);
     if (this.#queue.length >= MCP_BATCH_MAX_EVENTS) {
-      this.#keepAlive(this.flush());
+      const flushing = this.flush();
+      this.observe(flushing);
+      this.#keepAlive(flushing);
       return;
     }
     if (this.#timer) {
@@ -96,7 +98,9 @@ export class McpBatcher {
   }
 
   async settle(): Promise<void> {
-    await Promise.all(this.#observing);
+    while (this.#observing.size > 0) {
+      await Promise.all(this.#observing);
+    }
   }
 
   async flush(): Promise<void> {
