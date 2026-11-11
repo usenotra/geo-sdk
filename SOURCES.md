@@ -31,6 +31,21 @@ those checks.
 
 Last fully audited: **2026-08-22** (previous full audit 2026-08-05).
 
+- 2026-11-10: compared the list with Mintlify's published, open user-agent
+  classification and added 20 `reported` tokens it matches that we did not:
+  user-triggered fetchers (`codex_cli_rs/` and `codex-cli` for Codex CLI,
+  `Google-NotebookLM`, `Grok-DeepSearch`, `Qwen-User`, `WarpBot`,
+  `Amazon-Bedrock-AgentCore-Browser`), search indexes (`MistralAI-Index`,
+  `ref-tools-crawler`) and AI data crawlers (`ERNIEBot`, `QwenBot`, `Doubaobot`,
+  `ClueWeb-Crawler`, `Cotoyogi`, `ICC-Crawler`, `img2dataset`, `Kangaroo Bot`,
+  `VelenPublicWebCrawler`, `ImagesiftBot`, `aiHitBot`, `Factset_spyderbot`).
+  `Doubaobot` is heuristic because ByteDance does not say whether it trains or
+  answers. Our Codex CLI capture saw no fetcher of its own, so a Codex match most
+  likely comes from its HTTP MCP client. Robots-only directives Mintlify also lists
+  (`Google-Extended`, `Applebot-Extended`, `webzio-extended`) never appear in a
+  `User-Agent` and are not shipped. `xAI-SearchBot` stays out for the reason below.
+  Mintlify's generic `Copilot`, `Grok` and `chatgpt` substrings are too broad for a
+  first-match table.
 - 2026-11-06: added xAI's `GrokBot` as a `reported` catalog token. xAI's developer
   docs (checked in full via `docs.x.ai/llms-full.txt`) name no crawler user agent,
   robots.txt policy or IP ranges for Grok's web search fetches. In a controlled
@@ -55,7 +70,7 @@ Last fully audited: **2026-08-22** (previous full audit 2026-08-05).
   OpenCode's fallback) and ten `reported` catalog tokens for major AI assistants and
   AI data providers. OpenAI, Anthropic and Perplexity publish no new tokens since the
   previous audit; `OAI-AdsBot` and Meta's crawlers were explicitly re-verified.
-- Total shipped signatures: 67.
+- Total shipped signatures: 87.
 
 - All 63 signatures shipped at the full audit and every matched token were checked
   against the cited evidence below.
@@ -139,6 +154,26 @@ Last fully audited: **2026-08-22** (previous full audit 2026-08-05).
 | TavilyBot | Tavily | search-index | `TavilyBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
 | FirecrawlAgent | Firecrawl | search-index | `FirecrawlAgent` | heuristic | [Firecrawl scraping guide](https://docs.firecrawl.dev/advanced-scraping-guide) | No fixed outbound IPs |
 | GrokBot | xAI | search-index | `GrokBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | None published |
+| Codex CLI | OpenAI | assistant-browse | `codex_cli_rs/`, `codex-cli` | reported | [Codex source](https://github.com/openai/codex) | — |
+| Google-NotebookLM | Google | assistant-browse | `Google-NotebookLM` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| Grok-DeepSearch | xAI | assistant-browse | `Grok-DeepSearch` | reported | [Mintlify traffic classification](https://www.mintlify.com/docs/analytics/traffic-classification) | — |
+| Qwen-User | Alibaba | assistant-browse | `Qwen-User` | reported | [Mintlify traffic classification](https://www.mintlify.com/docs/analytics/traffic-classification) | — |
+| WarpBot | Warp | assistant-browse | `WarpBot` | reported | [Mintlify traffic classification](https://www.mintlify.com/docs/analytics/traffic-classification) | — |
+| Amazon-Bedrock-AgentCore-Browser | Amazon | assistant-browse | `Amazon-Bedrock-AgentCore-Browser` | reported | [Known Agents](https://knownagents.com/agents/amazon-bedrock-agentcore-browser) | — |
+| MistralAI-Index | Mistral | search-index | `MistralAI-Index` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| ref-tools-crawler | Ref | search-index | `ref-tools-crawler` | reported | [Mintlify traffic classification](https://www.mintlify.com/docs/analytics/traffic-classification) | — |
+| ERNIEBot | Baidu | training-crawler | `ERNIEBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| QwenBot | Alibaba | training-crawler | `QwenBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| Doubaobot | ByteDance | training-crawler | `Doubaobot` | heuristic | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| ClueWeb-Crawler | Carnegie Mellon University | training-crawler | `ClueWeb-Crawler` | reported | [Known Agents](https://knownagents.com/agents/clueweb-crawler) | — |
+| Cotoyogi | ROIS | training-crawler | `Cotoyogi` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| ICC-Crawler | NICT | training-crawler | `ICC-Crawler` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| img2dataset | img2dataset | training-crawler | `img2dataset` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| Kangaroo Bot | Unknown | training-crawler | `Kangaroo Bot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| VelenPublicWebCrawler | Velen | training-crawler | `VelenPublicWebCrawler` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| ImagesiftBot | ImageSift | training-crawler | `ImagesiftBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| aiHitBot | aiHit | training-crawler | `aiHitBot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
+| Factset_spyderbot | FactSet | training-crawler | `Factset_spyderbot` | reported | [ai.robots.txt catalog](https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/main/robots.json) | — |
 
 ## Matching and ordering notes
 
